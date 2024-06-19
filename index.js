@@ -26,10 +26,12 @@ let persons = [
   },
 ];
 
+// Get all persons
 app.get("/api/persons", (request, response) => {
   response.json(persons);
 });
 
+// Get a single person
 app.get("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   const person = persons.find((person) => person.id === id);
@@ -40,6 +42,44 @@ app.get("/api/persons/:id", (request, response) => {
   }
 });
 
+const generateId = () => {
+  const id = Math.floor(Math.random() * 100000);
+  return id;
+};
+
+// Create a new person
+app.post("/api/persons", (request, response) => {
+  const body = request.body;
+  const names = persons.map((n) => n.name);
+
+  if (!body.name) {
+    return response.status(400).json({
+      error: "name missing",
+    });
+  }
+  if (!body.number) {
+    return response.status(400).json({
+      error: "number missing",
+    });
+  }
+  if (names.includes(request.body.name)) {
+    return response.status(400).json({
+      error: "name must be unique",
+    });
+  }
+
+  const person = {
+    id: generateId(),
+    name: body.name,
+    number: body.number,
+  };
+
+  persons = persons.concat(person);
+
+  response.json(person);
+});
+
+// Delete a person
 app.delete("/api/persons/:id", (request, response) => {
   const id = Number(request.params.id);
   persons = persons.filter((person) => person.id !== id);
@@ -47,6 +87,7 @@ app.delete("/api/persons/:id", (request, response) => {
   response.status(204).end();
 });
 
+// Get info
 app.get("/info", (request, response) => {
   const timestamp = new Date();
   response.send(
