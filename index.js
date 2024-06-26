@@ -1,16 +1,16 @@
 require("dotenv").config();
 const express = require("express");
 const morgan = require("morgan");
-const Person = require("./models/person");
 const app = express();
 
 const cors = require("cors");
 
+const Person = require("./models/person");
+
 app.use(express.static("dist"));
+app.use(express.json());
 
 app.use(cors());
-
-app.use(express.json());
 
 morgan.token("body", (request) => {
   return JSON.stringify(request.body);
@@ -92,10 +92,9 @@ app.post("/api/persons", (request, response) => {
 
 // Delete a person
 app.delete("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  persons = persons.filter((person) => person.id !== id);
-
-  response.status(204).end();
+  Person.findByIdAndDelete(request.params.id).then((result) => {
+    response.status(204).end();
+  });
 });
 
 // Get info
