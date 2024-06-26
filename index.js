@@ -68,7 +68,6 @@ const generateId = () => {
 // Create a new person
 app.post("/api/persons", (request, response) => {
   const body = request.body;
-  const names = persons.map((n) => n.name);
 
   if (!body.name) {
     return response.status(400).json({
@@ -80,21 +79,15 @@ app.post("/api/persons", (request, response) => {
       error: "number missing",
     });
   }
-  if (names.includes(request.body.name)) {
-    return response.status(400).json({
-      error: "name must be unique",
-    });
-  }
 
-  const person = {
-    id: generateId(),
+  const person = new Person({
     name: body.name,
     number: body.number,
-  };
+  });
 
-  persons = persons.concat(person);
-
-  response.json(person);
+  person.save().then((savedPerson) => {
+    response.json(savedPerson);
+  });
 });
 
 // Delete a person
