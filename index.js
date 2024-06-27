@@ -20,21 +20,25 @@ app.use(
 );
 
 // Get all persons
-app.get("/api/persons", (request, response) => {
-  Person.find({}).then((persons) => {
-    response.json(persons);
-  });
+app.get("/api/persons", (request, response, next) => {
+  Person.find({})
+    .then((persons) => {
+      response.json(persons);
+    })
+    .catch((error) => next(error));
 });
 
 // Get a single person
-app.get("/api/persons/:id", (request, response) => {
-  const id = Number(request.params.id);
-  const person = persons.find((person) => person.id === id);
-  if (person) {
-    response.json(person);
-  } else {
-    response.status(404).end();
-  }
+app.get("/api/persons/:id", (request, response, next) => {
+  Person.findById(request.params.id)
+    .then((person) => {
+      if (person) {
+        response.json(person);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch((error) => next(error));
 });
 
 // Create a new person
@@ -91,11 +95,16 @@ app.delete("/api/persons/:id", (request, response, next) => {
 });
 
 // Get info
-app.get("/info", (request, response) => {
+app.get("/info", (request, response, next) => {
   const timestamp = new Date();
-  response.send(
-    `<p>Phonebook has info for ${persons.length} people</p><p>${timestamp}</p>`
-  );
+  Person.find({})
+    .then((persons) => {
+      response.send(
+        `<p>Phonebook has info for ${persons.length} people</p>
+            <p>${timestamp}</p>`
+      );
+    })
+    .catch((error) => next(error));
 });
 
 const unknownEndpoint = (request, response) => {
